@@ -9,13 +9,14 @@
 int val[5];  //save flex sesor val
 
 void setup() {
-  Serial.begin(4800);
+  Serial.begin(4800);   //lillypad Serial communication
   delay(2000);
 }
 
 void loop() {
   readFlexVal();
   checkBent();
+  delay(250);
 }
 
 
