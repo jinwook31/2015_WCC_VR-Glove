@@ -14,13 +14,13 @@ void setup() {
 }
 
 void loop() {
-  readFlexVal();
-  checkBent();
+  readVal();        //save val to arr
+  checkBent();      //check flex val
   delay(250);
 }
 
 
-void readFlexVal(){
+void readVal(){
   val[0] = analogRead(fin0);
   val[1] = analogRead(fin1);
   val[2] = analogRead(fin2);
@@ -30,7 +30,7 @@ void readFlexVal(){
 
 void checkBent(){
   for(int i = 0; i < 5; i++){
-    if(val[i] > 760){ 
+    if(val[i] > 770){ 
       Serial.println(i);  //0,1,2,3,4 == bent
     }else{
       Serial.println(i+5);  //5,6,7,8,9 == not bent
