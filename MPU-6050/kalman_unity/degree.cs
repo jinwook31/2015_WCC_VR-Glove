@@ -16,28 +16,36 @@ public class degree : MonoBehaviour {
 	// Update is called once per frame
 	void Update() {
 		if (sp.IsOpen) {
-			try {
-        sp.Write("s") ;  //send start data
-        val[0] = sp.ReadByte() ;  //read a byte
-        if (val[0] == 0xff) {  //check start byte
-          for (int i = 1; i < 10; i++) {
-            val[i] = sp.ReadByte() ;
-          }
-          
-          angle[0] = val[1] * (val[2] - 2) ;  //calculate value
-          angle[1] = val[3] * (val[4] - 2) ;
-          
-          transform.rotation = Quaternion.Euler(angle[1], 0f, angle[0]) ;  //rotate cube
+            try
+            {
+                sp.Write("s");  //send start data
+                val[0] = sp.ReadByte();  //read a byte
+                if (val[0] == 0xff)
+                {  //check start byte
+                    for (int i = 1; i < 10; i++)
+                    {
+                        val[i] = sp.ReadByte();
+                    }
 
-            for(int j = 6; j < 10;j++){
-                if(val[j] < 4){
-                    //bent
-                }else{
-                    //not bent
+                    angle[0] = val[1] * (val[2] - 2);  //calculate value
+                    angle[1] = val[3] * (val[4] - 2);
+
+                    transform.rotation = Quaternion.Euler(angle[1], 0f, angle[0]);  //rotate cube
+
+                    for (int j = 6; j < 10; j++)
+                    {
+                        if (val[j] < 4)
+                        {
+                            //bent
+                        }
+                        else
+                        {
+                            //not bent
+                        }
+                    }
                 }
-        }
-			}
-      catch (System.Exception) {}
+            }
+            catch (System.Exception) { }
 		}
 	}
 }
