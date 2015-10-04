@@ -2,14 +2,12 @@
 #include <Wire.h>
 #define mpu_add 0x68  //mpu6050 address
 
-#define fin0 0
-#define fin1 1
-#define fin2 2
-#define fin3 3      //flex sensor (analog)
-
-
-int val[5];  //save flex sesor val
-int checkFlexVal [5]; //check & trans sig
+const int analogInPin = A0;  // analog input
+const int pin_A = 2; // adress pins for MUX
+const int pin_B = 3;
+const int pin_C = 4;
+int Flex_Val[5];
+int Check[5];
 
 class kalman {
   public :
@@ -87,23 +85,29 @@ uint32_t pasttime ;
 
 
 void setup() {
-  //Serial.begin(4800);   //lillypad Serial communication
-  Serial.begin(9600);    //UNO Serial communication
+  Serial.begin(4800);   //lillypad Serial communication
+  //Serial.begin(9600);    //UNO Serial communication - Unity communication
   delay(2000);
   
-  Wire.begin() ;
-  Wire.beginTransmission(mpu_add) ;
-  Wire.write(0x6B) ;
-  Wire.write(0) ;
-  Wire.endTransmission(true) ;
-  kalx.init(0.001, 0.003, 0.03) ;  //init kalman filter
-  kaly.init(0.001, 0.003, 0.03) ;
-  kalz.init(0.001, 0.003, 0.03) ;
+  pinMode(pin_A, OUTPUT);
+  pinMode(pin_B, OUTPUT);
+  pinMode(pin_C, OUTPUT);
+  
+  Wire.begin();
+  Wire.beginTransmission(mpu_add);
+  Wire.write(0x6B);
+  Wire.write(0);
+  Wire.endTransmission(true);
+  kalx.init(0.001, 0.003, 0.03);  //init kalman filter
+  kaly.init(0.001, 0.003, 0.03);
+  kalz.init(0.001, 0.003, 0.03);
 }
 
+
 void loop() {
-  readVal();        //save val to arr
-  checkBent();      //check flex val
+  
+  readVal();
+  checkVal();
   
   Wire.beginTransmission(mpu_add) ; //get acc data
   Wire.write(0x3B) ;
@@ -153,30 +157,46 @@ void loop() {
       Serial.write(sign[0]) ;
       Serial.write(pass_data[1]) ;
       Serial.write(sign[1]) ;     //MPU - kalfilter val.
-      for(int i=0; i < 4; i++){ Serial.write(checkFlexVal[i]);  }  //send Felx Val.
+      
+      //send flex val.
+      for(int i=0; i < 5; i++){
+        Serial.write(Check[i]);
+      }
+      
       Serial.flush() ;
+      delay(100);
     }
   }
 }
-
 
 void readVal(){
-  val[0] = analogRead(fin0);
-  val[1] = analogRead(fin1);
-  val[2] = analogRead(fin2);
-  val[3] = analogRead(fin3);
+  digitalWrite(pin_A, LOW); digitalWrite(pin_B, LOW); digitalWrite(pin_C, LOW);
+  Flex_Val[1] = analogRead(analogInPin);
+  //0
+  
+  digitalWrite(pin_A, LOW); digitalWrite(pin_B, HIGH); digitalWrite(pin_C, LOW);
+  Flex_Val[3] = analogRead(analogInPin);
+  //2
+    
+  digitalWrite(pin_A, HIGH); digitalWrite(pin_B, HIGH); digitalWrite(pin_C, LOW);
+  Flex_Val[0] = analogRead(analogInPin);
+  //3
+    
+  digitalWrite(pin_A, HIGH); digitalWrite(pin_B, LOW); digitalWrite(pin_C, HIGH);
+  Flex_Val[4] = analogRead(analogInPin);
+  //5
+  
+  Flex_Val[2] = analogRead(A1);
 }
 
-void checkBent(){
-  for(int i = 0; i < 4; i++){
-    if(val[i] > 770){ 
-      //Serial.println(i);  //0,1,2,3 == bent
-      checkFlexVal[i] = i;
+void checkVal(){
+  for(int i=0; i < 5; i++){
+    if(i == 2 && Flex_Val[i] > 900){
+      Check[i] = 1;
+    }else if(i != 2 && Flex_Val[i] > 83){
+      Check[i] = 1;       //bent
     }else{
-      //Serial.println(i+5);  //5,6,7,8 == not bent
-      checkFlexVal[i] = i+5;
+      Check[i] = 0;
     }
   }
 }
-
-
