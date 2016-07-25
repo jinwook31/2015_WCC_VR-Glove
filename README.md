@@ -1,4 +1,4 @@
-# 2015_WCC_VR-Glove
+# VR prototyping and control Glove
 
 GROW / VR + Controller Glove
 
